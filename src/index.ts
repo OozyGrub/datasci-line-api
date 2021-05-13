@@ -87,7 +87,7 @@ app.get("/", (req, res) => {
   return res.send("Hello World");
 });
 
-app.post("/predict", async () => {
+app.post("/predict", async (req, res) => {
   const province = "Bangkok";
   const time = "2018-01-01 07:00:00";
   const timeString = moment(time, "YYYY-MM-DD hh:mm:ss").format("llll");
@@ -100,15 +100,17 @@ app.post("/predict", async () => {
     const flex = getFlex({
       province,
       time: timeString,
-      pm: data.predict[0]
+      pm: data.predict[0].toString()
     });
     await lineClient.broadcast(flex as any);
+    return res.sendStatus(200);
   } catch (e) {
     console.error(e);
     await lineClient.broadcast({
       type: "text",
-      text: JSON.stringify(e)
+      text: "ERROR"
     });
+    return res.sendStatus(400).send(e);
   }
 });
 
