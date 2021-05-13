@@ -5,11 +5,14 @@ import { get } from "lodash";
 import { Client } from "@line/bot-sdk";
 import bodyParser from "body-parser";
 import express from "express";
+import axios from "axios";
 
 // Init Express
 const app = express();
 app.use(bodyParser.json());
 const port = process.env.PORT || 8080;
+
+const lineApi = "https://api.line.me/v2/bot/message/narrowcast";
 
 // Init LINE SDK
 const lineClient = new Client({
@@ -84,6 +87,13 @@ app.post("/webhook", async (req, res) => {
 
 app.get("/", (req, res) => {
   return res.send("Hello World");
+});
+
+app.post("/predict", async () => {
+  lineClient.broadcast({
+    type: "text",
+    text: "Broad cast work!"
+  });
 });
 
 app.listen(port, () => {
