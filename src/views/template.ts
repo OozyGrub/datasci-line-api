@@ -20,7 +20,7 @@ const harden = (color: string) => color + "FF";
 const normal = (color: string) => color + "DD";
 const lighten = (color: string) => color + "66";
 
-export const getFlex = (data: FlexData) => {
+export const getLineFlexMessage = (data: FlexData) => {
   const { province, time, pm } = data;
 
   const color = getColor(toCategory(pm));
@@ -80,15 +80,6 @@ export const getFlex = (data: FlexData) => {
                   }
                 ]
               },
-              // {
-              //   type: "text",
-              //   text: Math.round(pm).toLocaleString(),
-              //   color: "#ffffff",
-              //   align: "start",
-              //   size: "lg",
-              //   gravity: "center",
-              //   margin: "lg"
-              // },
               {
                 type: "box",
                 layout: "vertical",

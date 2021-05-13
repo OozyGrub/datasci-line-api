@@ -1,3 +1,4 @@
+import { ModelService, predict } from "./service/predict.service";
 import "dotenv/config";
 
 import { get } from "lodash";
@@ -6,7 +7,7 @@ import { Client } from "@line/bot-sdk";
 import bodyParser from "body-parser";
 import express from "express";
 import axios from "axios";
-import { getFlex } from "./views/template";
+import { getLineFlexMessage } from "./views/template";
 import moment from "moment";
 
 // Init Express
@@ -19,6 +20,8 @@ const lineClient = new Client({
   channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN
 });
 
+const modelService = new ModelService();
+
 // Webhook
 app.post("/webhook", async (req, res) => {
   const event = get(req, ["body", "events", "0"]);
@@ -29,7 +32,7 @@ app.post("/webhook", async (req, res) => {
   try {
     await lineClient.replyMessage(replyToken, {
       type: "text",
-      text: JSON.stringify(event.source)
+      text: "Please wait until the time"
     });
     res.sendStatus(200);
   } catch (e) {
@@ -42,33 +45,25 @@ app.get("/", (req, res) => {
   return res.send("Hello World");
 });
 
-type ModelData = {
-  predict: number[];
-  actual: number[];
-};
-app.post("/predict", async (req, res) => {
-  const province = "Bangkok";
-
-  const currentMoment = moment().add(3, "days");
-  const time = currentMoment.format("2018-MM-DD hh:00:00");
-
+app.post("/predict/group", async (rea, res) => {
   try {
-    const response = await axios.post(process.env.MODEL_API + "/predict/", {
-      province,
-      time
+    const message = await modelService.predict();
+    await lineClient.pushMessage(process.env.ROOM_ID, message as any);
+    return res.sendStatus(200);
+  } catch (e) {
+    console.error(e);
+    await lineClient.broadcast({
+      type: "text",
+      text: "ERROR"
     });
-    const data: ModelData = JSON.parse(response.data);
+    return res.sendStatus(400).send(e);
+  }
+});
 
-    const pm = data.predict[0];
-
-    const flex = getFlex({
-      province,
-      time: currentMoment.format("[predict] MMM DD, hh:00"),
-      pm
-    });
-
-    await lineClient.broadcast(flex as any);
-
+app.post("/predict", async (req, res) => {
+  try {
+    const message = await modelService.predict();
+    await lineClient.broadcast(message as any);
     return res.sendStatus(200);
   } catch (e) {
     console.error(e);
