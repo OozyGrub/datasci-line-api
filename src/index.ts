@@ -6,13 +6,12 @@ import { Client } from "@line/bot-sdk";
 import bodyParser from "body-parser";
 import express from "express";
 import axios from "axios";
+import { getFlex } from "./flex";
 
 // Init Express
 const app = express();
 app.use(bodyParser.json());
 const port = process.env.PORT || 8080;
-
-const lineApi = "https://api.line.me/v2/bot/message/narrowcast";
 
 // Init LINE SDK
 const lineClient = new Client({
@@ -25,8 +24,6 @@ app.post("/webhook", async (req, res) => {
   const eventType = get(event, ["message", "type"]);
   const message = get(event, ["message", "text"]);
   const replyToken = get(event, "replyToken") as string;
-
-  console.log(process.env.LINE_CHANNEL_ACCESS_TOKEN);
 
   try {
     await lineClient.replyMessage(replyToken, {
@@ -90,10 +87,21 @@ app.get("/", (req, res) => {
 });
 
 app.post("/predict", async () => {
-  lineClient.broadcast({
-    type: "text",
-    text: "Broad cast work!"
-  });
+  const province = "Bangkok";
+  const time = "2018-01-01 07:00:00";
+  try {
+    const { data } = await axios.post<{ actual: string; predict: string }>(
+      process.env.MODEL_API + "/predict",
+      { province, time }
+    );
+    const flex = getFlex({ province, time, pm: parseInt(data.predict) });
+    await lineClient.broadcast(flex as any);
+  } catch (e) {
+    await lineClient.broadcast({
+      type: "text",
+      text: "ERROR"
+    });
+  }
 });
 
 app.listen(port, () => {
