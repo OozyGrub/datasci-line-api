@@ -28,7 +28,7 @@ export const getLineFlexMessage = (data: FlexData) => {
 
   return {
     type: "flex",
-    altText: time + ":" + pm,
+    altText: time + " PM2.5 = " + pm,
     contents: {
       type: "carousel",
       contents: [
