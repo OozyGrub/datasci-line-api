@@ -6,7 +6,7 @@ import { Client } from "@line/bot-sdk";
 import bodyParser from "body-parser";
 import express from "express";
 import axios from "axios";
-import { getFlex } from "./flex";
+import { getFlex } from "./views/template";
 import moment from "moment";
 
 // Init Express
@@ -35,75 +35,40 @@ app.post("/webhook", async (req, res) => {
   } catch (e) {
     console.error(e);
     res.sendStatus(200);
-    // res.sendStatus(400).send(e);
   }
-
-  //   // Validate input message
-  //   if (eventType !== "text" || !isValidAddress(message)) {
-  //     await lineClient.replyMessage(replyToken, {
-  //       type: "text",
-  //       text: "Please input valid BSC address. For example, 0x3c74c735b5863c0baf52598d8fd2d59611c8320f 🐳"
-  //     } as any);
-  //   }
-
-  // Get poolInfos and store it to fetch faster
-  // const pools = await masterchef.getPoolInfos();
-
-  //   const positions = sortBy(
-  //     stakings.map((stake) => getPositions(stake)),
-  //     ["totalValue"]
-  //   ).reverse();
-
-  //   const totalValue = positions.reduce(
-  //     (sum, position) => sum + position.totalValue,
-  //     0
-  //   );
-
-  //   try {
-  //     await lineClient.replyMessage(replyToken, {
-  //       type: "flex",
-  //       altText: "Crow Staking",
-  //       contents: {
-  //         type: "bubble",
-  //         body: {
-  //           type: "box",
-  //           layout: "vertical",
-  //           contents: [
-  //             addressBar(shortenAddress(address)),
-  //             tableHeader(),
-  //             ...positions.map((position) => poolLine(position)),
-  //             summary(totalValue)
-  //           ]
-  //         }
-  //       }
-  //     } as any);
-  //     return res.sendStatus(200);
-  //   } catch (e) {
-  //     return res.status(400).send(e);
-  //   }
 });
 
 app.get("/", (req, res) => {
   return res.send("Hello World");
 });
 
+type ModelData = {
+  predict: number[];
+  actual: number[];
+};
 app.post("/predict", async (req, res) => {
   const province = "Bangkok";
-  const time = "2018-01-01 07:00:00";
-  const timeString = moment(time, "YYYY-MM-DD hh:mm:ss").format("llll");
+
+  const currentMoment = moment().add(3, "days");
+  const time = currentMoment.format("2018-MM-DD hh:00:00");
 
   try {
     const response = await axios.post(process.env.MODEL_API + "/predict/", {
       province,
       time
     });
-    const data = JSON.parse(response.data);
+    const data: ModelData = JSON.parse(response.data);
+
+    const pm = data.predict[0];
+
     const flex = getFlex({
       province,
-      time: timeString,
-      pm: data.predict[0].toString()
+      time: currentMoment.format("[predict] MMM DD, hh:00"),
+      pm
     });
+
     await lineClient.broadcast(flex as any);
+
     return res.sendStatus(200);
   } catch (e) {
     console.error(e);
