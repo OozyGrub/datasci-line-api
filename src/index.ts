@@ -100,7 +100,7 @@ app.post("/predict", async () => {
     const flex = getFlex({
       province,
       time: timeString,
-      pm: parseInt(data.predict)
+      pm: data.predict
     });
     await lineClient.broadcast(flex as any);
   } catch (e) {

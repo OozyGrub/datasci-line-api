@@ -1,7 +1,7 @@
 type FlexData = {
   province: string;
   time: string;
-  pm: number;
+  pm: string;
 };
 export const getFlex = (data: FlexData) => {
   const { province, time, pm } = data;
