@@ -7,6 +7,7 @@ import bodyParser from "body-parser";
 import express from "express";
 import axios from "axios";
 import { getFlex } from "./flex";
+import moment from "moment";
 
 // Init Express
 const app = express();
@@ -89,12 +90,18 @@ app.get("/", (req, res) => {
 app.post("/predict", async () => {
   const province = "Bangkok";
   const time = "2018-01-01 07:00:00";
+  const timeString = moment(time, "YYYY-MM-DD hh:mm:ss").format("llll");
+
   try {
     const { data } = await axios.post<{ actual: string; predict: string }>(
       process.env.MODEL_API + "/predict",
       { province, time }
     );
-    const flex = getFlex({ province, time, pm: parseInt(data.predict) });
+    const flex = getFlex({
+      province,
+      time: timeString,
+      pm: parseInt(data.predict)
+    });
     await lineClient.broadcast(flex as any);
   } catch (e) {
     await lineClient.broadcast({
