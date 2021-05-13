@@ -93,19 +93,14 @@ app.post("/predict", async () => {
   const timeString = moment(time, "YYYY-MM-DD hh:mm:ss").format("llll");
 
   try {
-    const { data } = await axios.post<{ actual: string; predict: string }>(
-      process.env.MODEL_API + "/predict",
+    const { data } = await axios.post<{ actual: string[]; predict: string[] }>(
+      process.env.MODEL_API + "/predict/",
       { province, time }
     );
-    console.log("SUCCESS");
-    await lineClient.broadcast({
-      type: "text",
-      text: "SUCCESS"
-    });
     const flex = getFlex({
       province,
       time: timeString,
-      pm: data.predict
+      pm: data.predict[0]
     });
     await lineClient.broadcast(flex as any);
   } catch (e) {
