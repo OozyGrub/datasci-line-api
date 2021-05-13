@@ -28,7 +28,7 @@ export const getFlex = (data: FlexData) => {
 
   return {
     type: "flex",
-    altText: "This is a Flex message",
+    altText: time + ":" + pm,
     contents: {
       type: "carousel",
       contents: [
