@@ -93,10 +93,11 @@ app.post("/predict", async (req, res) => {
   const timeString = moment(time, "YYYY-MM-DD hh:mm:ss").format("llll");
 
   try {
-    const { data } = await axios.post<{ actual: string[]; predict: string[] }>(
-      process.env.MODEL_API + "/predict/",
-      { province, time }
-    );
+    const response = await axios.post(process.env.MODEL_API + "/predict/", {
+      province,
+      time
+    });
+    const data = JSON.parse(response.data);
     const flex = getFlex({
       province,
       time: timeString,
