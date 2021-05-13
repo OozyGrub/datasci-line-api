@@ -6,9 +6,6 @@ import { get } from "lodash";
 import { Client } from "@line/bot-sdk";
 import bodyParser from "body-parser";
 import express from "express";
-import axios from "axios";
-import { getLineFlexMessage } from "./views/template";
-import moment from "moment";
 
 // Init Express
 const app = express();
@@ -30,10 +27,8 @@ app.post("/webhook", async (req, res) => {
   const replyToken = get(event, "replyToken") as string;
 
   try {
-    await lineClient.replyMessage(replyToken, {
-      type: "text",
-      text: "Please wait until the time"
-    });
+    const message = await modelService.predict();
+    await lineClient.replyMessage(replyToken, message as any);
     res.sendStatus(200);
   } catch (e) {
     console.error(e);
@@ -52,10 +47,10 @@ app.post("/predict/group", async (rea, res) => {
     return res.sendStatus(200);
   } catch (e) {
     console.error(e);
-    await lineClient.broadcast({
-      type: "text",
-      text: "ERROR"
-    });
+    // await lineClient.broadcast({
+    //   type: "text",
+    //   text: "ERROR"
+    // });
     return res.sendStatus(400).send(e);
   }
 });
@@ -67,10 +62,10 @@ app.post("/predict", async (req, res) => {
     return res.sendStatus(200);
   } catch (e) {
     console.error(e);
-    await lineClient.broadcast({
-      type: "text",
-      text: "ERROR"
-    });
+    // await lineClient.broadcast({
+    //   type: "text",
+    //   text: "ERROR"
+    // });
     return res.sendStatus(400).send(e);
   }
 });
