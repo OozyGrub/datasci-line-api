@@ -29,7 +29,7 @@ app.post("/webhook", async (req, res) => {
   try {
     await lineClient.replyMessage(replyToken, {
       type: "text",
-      text: "It works!"
+      text: JSON.stringify(event.source)
     });
     res.sendStatus(200);
   } catch (e) {
