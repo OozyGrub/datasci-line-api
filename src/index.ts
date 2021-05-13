@@ -97,9 +97,10 @@ app.post("/predict", async () => {
       process.env.MODEL_API + "/predict",
       { province, time }
     );
+    console.log("SUCCESS");
     await lineClient.broadcast({
       type: "text",
-      text: JSON.stringify(data)
+      text: "SUCCESS"
     });
     const flex = getFlex({
       province,
